@@ -29,3 +29,6 @@ The dataset in this repository was created by me and is completely fictional. It
 
 ## License
 This project is licensed under the MIT License. See the LICENSE file for more details.
+
+This project is licensed under the [MIT License](LICENSE). See the LICENSE file for more details.
+
