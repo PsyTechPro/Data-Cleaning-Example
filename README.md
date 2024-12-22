@@ -19,8 +19,8 @@ In this project, I showcase the following data cleaning steps:
 
 ## Repository Contents
 - **data/**: Contains the fictional dataset used for this project.
-- **notebooks**/: Includes Jupyter Notebooks with step-by-step explanations of the data cleaning process.
-- **scripts**/: Python scripts for automating the data cleaning steps.
+- **scripts**/: Contains the Python codes used for the data cleaning process, detailing each step described in this project.
+- **documentation**/: A comprehensive document describing the dataset, the purpose of this project, and the data cleaning steps performed.
 - **README.md**: This file.
 
 ## About the Dataset
