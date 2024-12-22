@@ -19,9 +19,9 @@ In this project, I showcase the following data cleaning steps:
   - NumPy
 
 ## Repository Contents
-- **data**/: Contains the fictional dataset used for this project.
-- **scripts**/: Contains the Python codes used for the data cleaning process, detailing each step described in this project.
-- **documentation**/: A comprehensive document describing the dataset, the purpose of this project, and the data cleaning steps performed.
+- **data**/: A .csv file containing the fictional dataset used for this project.
+- **data_cleaning_steps.txt**/: A .txt the Python codes used for the data cleaning process, detailing each step described in this project.
+- **occupation_dataset_and_cleaning_overview.pdf**/: A PDF document providing comprehensive document describing the dataset, the purpose of this project, and the data cleaning steps performed.
 - **README.md**: This file.
 
 ## About the Dataset
