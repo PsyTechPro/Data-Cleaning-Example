@@ -18,12 +18,10 @@ In this project, I showcase the following data cleaning steps:
   - NumPy
 
 ## Repository Contents
-**data/**: Contains the fictional dataset used for this project.
-**notebooks**/: Includes Jupyter Notebooks with step-by-step explanations of the data cleaning process.
-
-**scripts**/: Python scripts for automating the data cleaning steps.
-
-**README.md**: This file.
+-**data/**: Contains the fictional dataset used for this project.
+-**notebooks**/: Includes Jupyter Notebooks with step-by-step explanations of the data cleaning process.
+-**scripts**/: Python scripts for automating the data cleaning steps.
+-**README.md**: This file.
 
 ## About the Dataset
 The dataset in this repository was created by me and is completely fictional. It is intended for educational purposes only and does not represent real-world data.
