@@ -1,0 +1,133 @@
+import pandas as pd   
+import numpy as np    
+
+
+# FIRST LOAD THE DATASET 
+# NOTE: REPLACE <your file path> WITH THE FULL PATH TO THE DATASET ON YOUR LOCAL MACHINE
+data = pd.read_csv(r"<your file path>/occupation_dataset.csv")
+
+
+# 1. Drop irrelevant columns 
+# THIS WILL DROP IRRELEVANT AND/OR UNWANTED COLUMNS 
+# THE 'UNNAMED: 0' REPRESENTS THE FAR LEFT COLUMN IN THE CSV THAT IS UNNAMED (BEGINNING WITH '1'); TO THE RIGHT IS THE "EMPLOYEE ID" COLUMN 
+# WHEN YOU RUN THIS CODE AND RUN data.head(), THE FIRST ROW WILL BE '0'
+to_drop = ['Parent Education Level','Favorite Activity','Unnamed: 0'] 
+data.drop(to_drop, inplace=True, axis=1)
+data.head(10)
+
+
+# 2. Standardizing values in a column by handling lowercase values and abbreviations
+# THIS WILL STANDARDIZE THE 'GENDER' COLUMN TO HAND BOTH UPPERCASE AND LOWERCASE VALUES 
+data['Gender'] = data['Gender'].str.strip().str.lower().map({
+    'f': 'Female',
+    'female': 'Female',
+    'm': 'Male',
+    'male': 'Male'
+}).fillna(data['Gender'])  # Retain original value if it doesn't match any key
+
+#THIS WILL CONVERT THE UPPERCASE 'F' AND 'M' CASES TO 'Female' AND 'Male,' RESPECTIVELY, IN THE 'GENDER' COLUMN  
+data['Gender'] = data['Gender'].replace({'F': 'Female', 'M': 'Male'})
+
+
+# 3. Filter employees by department
+# FIRST, LET'S GET THE UNIQUE VALUES (JOB ROLES) AND THEIR COUNTS IN THE 'DEPARTMENT' COLUMN
+department_counts = data['Department'].value_counts()
+print(department_counts)
+
+
+# NOW LET'S SELECT THOSE EMPLOYEES IN THE MARKETING, FINANCE, SALES, AND OPERATIONS DEPARTMENT IN FURTHER ANALYSES 
+len(data)- (
+     len(data[data['Department']=='Marketing'])+
+     len(data[data['Department']=='Finance'])+
+     len(data[data['Department']=='Sales'])+
+     len(data[data['Department']=='Operations']))
+    
+# NEXT, DROP THE UNRELATED OR UNWANTED JOB ROLES 
+data = data.drop(data
+                       [(data['Department'] != 'Marketing') & 
+                        (data['Department'] != 'Finance') & 
+                        (data['Department'] != 'Sales') &
+                        (data['Department'] != 'Operations')
+                       ].index
+                       )
+# NOW, THE COLUMN 'DEPARTMENT' WILL INCLUDE ONLY OUR TARGETED JOB ROLES
+# RUN THE PREVIOUS CODE ABOVE TO CONFIRM THIS, THAT IS: 
+department_counts = data['Department'].value_counts()
+print(department_counts)
+
+
+# THE CODE BELOW WILL ENABLE YOU TO SEE THAT THERE ARE SEVERAL UNWANTED '-1' VALUES IN THE 'PROMOTION IN LAST 5 YEARS' COLUMN
+promotion_counts = data['Promotion in Last 5 Years'].value_counts()
+print(promotion_counts)
+
+# THIS WILL GIVE YOU THE NUMBER OF CASES OF '-1' IN THE 'PROMOTION IN LAST 5 YEARS COLUMN,' WHICH SHOULD BE 9 
+len(data[data['Promotion in Last 5 Years'].str.contains('-1')])
+
+# NOW, THIS WILL DROP CASES OF '-1' IN THE 'PROMOTION IN LAST 5 YEARS' COLUMN 
+data = data[data['Promotion in Last 5 Years'] != '-1']
+
+
+# THIS WILL ENABLE YOU TO DETERMINE THE NUMBER OF MISSING VALUES (NaN) IN THE 'STRESS LEVEL' COLUMN  
+stress_counts = data['Stress Level'].value_counts(dropna=False).sort_index(ascending=False)
+print(stress_counts)
+
+# HOW TO HANDLE MISSING DATA IN THE 'STRESS LEVEL' COLUMN: MEAN, MEDIAN, OR MODE IMPUTATION; DROP MISSING VALUES, OR REPLACING MISSING VALUES WITH PREVIOUS VALUE  
+#data['Stress Level'].fillna(data['Stress Level'].mean(), inplace=True)  # MEAN IMPUTATION (if normal distribution)
+#data['Stress Level'].fillna(data['Stress Level'].median(), inplace=True)  # MEDIAN IMPUTATION (if normal dist.)
+#data['Stress Level'].fillna(data['Stress Level'].mode()[0], inplace=True) # MODE IMPUTATION (if data skewed)
+
+#TO REPLACE MISSING VALUES WITH THE PREVIOUS VALUE (FORWARD FILL IMPUTATION, OR FFILL): 
+data['Stress Level'].fillna(method='ffill', inplace=True)
+
+# TO DROP MISSING CASES, DO THE FOLLOWING: 
+#data = data.dropna(subset=['Stress Level'])
+
+
+
+# TO SPLIT THE DATA IN THE 'DATE HIRED' COLUMN INTO SEPARATE 'YEAR HIRED' AND 'MONTH HIRED' COLUMNS: 
+# FIRST, SPLIT THE 'DATE HIRED' COLUMN INTO 'YEAR HIRED' AND 'MONTH HIRED'
+data[['Year Hired', 'Month Hired']] = data['Date Hired'].str.split('/', expand=True)
+
+# NEXT, CONVERT THE NEW COLUMNS INTO INTEGERS 
+data['Year Hired'] = data['Year Hired'].astype(int)
+data['Month Hired'] = data['Month Hired'].astype(int)
+
+# NEXT, DROP THE ORIGINAL 'DATA HIRED' COLUMN 
+data = data.drop(columns=['Date Hired'])
+
+# LAST, DISPLAY THE FIRST FEW ROWS TO VERIFY 
+data[['Year Hired', 'Month Hired']].head()
+
+# ALWAYS A GOOD IDEA TO LOOK AT FIRST FEW ROWS OF CLEANED-UP DATASET TO VERIFY CHANGES 
+data.head()
+
+
+
+# TO REMOVE 'K(est.)' AND KEEP ONLY THE NUMERIC PART OF THE 'ANNUAL SALARY' COLUMN: 
+data['Annual Salary'] = data['Annual Salary'].str.replace('K\(est\.\)', '', regex=True).astype(float)
+
+# DISPLAY THE FIRST FEW ROWS TO VERITY THE TRANSFORMATION
+data['Annual Salary'].head()
+
+
+
+# SKILLS WE WANT TO SEARCH FOR IN THE 'JOB DESCRIPTION' COLUMN FOR THOSE IN THE 'OPERATIONS' ROLE (IN 'DEPARTMENT' COLUMN)
+# FIRST, DEFINE THE LIST OF SKILLS WE WANT TO SEARH FOR:
+skills = ['data analysis', 'sql', 'python', 'power bi', 'social media', 'excel', ' R ', 'CRM']
+
+# NEXT, CREATE A REGREX PATTERN BY JOINING THE SKILLS WITH THE '|' OPERATOR 
+skills_pattern = '|'.join(skills)
+
+# NEXT, FILTER THE DATAFRAME FOR ROWS WHERE 'DEPARTMENT' IS 'OPERATIONS' 
+operations_jobs = data[data['Department'] == 'Operations']
+
+# NEXT, COUNT THE OCCURRENCES OF EACH SKILL IN THE 'JOB DESCRIPTION' COLUMN 
+skill_counts = {f"Number of jobs that require {skill}": operations_jobs['Job Description'].str.contains(skill, case=False, na=False).sum() for skill in skills}
+
+# NEXT, CONVERT THE SKILL COUNTS TO A DATAFRAME 
+results_df = pd.DataFrame(list(skill_counts.items()), columns=['Skill', 'Count'])
+
+# LAST, ADD A NOTE INDICATING THAT THESE RESULTS APPLY ON TO 'OPERATIONS' JOB ROLE 
+print("Skill counts based on job descriptions for the 'Operations' department:")
+print(results_df)
+    
